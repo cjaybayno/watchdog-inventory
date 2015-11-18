@@ -1,0 +1,6 @@
+{
+    "require": {
+        "components/jquery": "^2.1",
+        "illuminate/html": "^5.0"
+    }
+}

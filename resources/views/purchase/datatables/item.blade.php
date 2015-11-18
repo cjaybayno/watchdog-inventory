@@ -1,0 +1,1 @@
+{{ $item_brand }} {{ $item_name }} ({{ $item_measurement }}{{ $item_unit }})

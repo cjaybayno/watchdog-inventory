@@ -1,0 +1,1 @@
+<img src="{{ $avatar }}" alt="User Image" class="img-thumbnail" style="height:50px; width:50px">
