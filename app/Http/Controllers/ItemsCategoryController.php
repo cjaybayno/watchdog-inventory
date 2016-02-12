@@ -12,11 +12,6 @@ use App\Repositories\ParametersRepository as Parameters;
 class ItemsCategoryController extends Controller
 {
 	/**
-     * The parameters implementation.
-     */
-	protected $parameters;
-	
-	/**
      * Validation additional rules for UNIQUE
      */
 	protected $validationRulesForUnique = 'NULL,id,param_group,items_category';
@@ -26,14 +21,6 @@ class ItemsCategoryController extends Controller
 	*/
     public $menuKey   = 'itemCategoryActiveMenu';
 	public $menuValue = 'active';
-	
-	/**
-     * Constructor enject repos.
-     */
-	public function __construct(Parameters $parameters)
-	{
-		$this->parameters = $parameters;
-	}
 	
     /**
      * Display a listing of the resource.
@@ -67,10 +54,14 @@ class ItemsCategoryController extends Controller
 		])->where('param_group', 'items_category');
 		
 		return Datatables::of($parameters)
+			->addColumn('description', function ($parameters) {
+				return json_decode($parameters->param_value, true)['desc'];
+			})
 			->addColumn('action', function ($parameters) {
 				return view('items/category/datatables.action', $parameters)->render();
 			})
 			->removeColumn('id')
+			->removeColumn('param_value')
 			->make();
     }
 
@@ -81,7 +72,7 @@ class ItemsCategoryController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function postStore(Request $request)
-    {	
+    {
         $this->validate($request, [
 			'name' 			=> 'required|unique:parameters,param_name,'.$this->validationRulesForUnique,
 			'label'			=> 'required|unique:parameters,param_label,'.$this->validationRulesForUnique,
@@ -89,9 +80,9 @@ class ItemsCategoryController extends Controller
 		]);
 		
 		$itemCategory = new Parameter;
-		$itemCategory->param_name  = ucfirst($request->name);
-		$itemCategory->param_label = ucfirst($request->label);
-		$itemCategory->param_value = $request->description;
+		$itemCategory->param_name  = ucwords($request->name);
+		$itemCategory->param_label = ucwords($request->label);
+		$itemCategory->param_value = json_encode(['desc' => $request->description]);
 		$itemCategory->param_group = 'items_category';
 		$itemCategory->save();
 		
@@ -115,7 +106,7 @@ class ItemsCategoryController extends Controller
 			'id'		  => $itemCategory->id,
 			'name' 		  => $itemCategory->param_name,
 			'label' 	  => $itemCategory->param_label,
-			'description' => $itemCategory->param_value,
+			'description' => json_decode($itemCategory->param_value, true)['desc'],
 		]);
     }
 	
@@ -138,9 +129,14 @@ class ItemsCategoryController extends Controller
 			'description'	=> 'required',
 		]);
 		
-		$itemCategory->param_name  = ucfirst($request->name);
-		$itemCategory->param_label = ucfirst($request->label);
-		$itemCategory->param_value = $request->description;
+		/* === get all existing param_value, then replace 'desc' with new === */
+		$itemCategoryParamValue 		= json_decode($itemCategory->param_value, true);
+		$itemCategoryParamValue['desc'] = $request->description;
+		$itemCategoryModified   		= json_encode($itemCategoryParamValue);
+		
+		$itemCategory->param_name  = ucwords($request->name);
+		$itemCategory->param_label = ucwords($request->label);
+		$itemCategory->param_value = $itemCategoryModified;
 		$itemCategory->param_group = 'items_category';
 		$itemCategory->save();
 		

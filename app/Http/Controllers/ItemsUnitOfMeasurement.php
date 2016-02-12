@@ -7,28 +7,14 @@ use Datatables;
 use App\Parameter;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\Repositories\ParametersRepository as Parameters;
 
 class ItemsUnitOfMeasurement extends Controller
 {
-	/**
-     * The parameters implementation.
-     */
-	protected $parameters;
-	
 	/**
 	* Determine Active Menu
 	*/
     public $menuKey   = 'itemUomActiveMenu';
 	public $menuValue = 'active';
-	
-	/**
-     * Constructor enject repos.
-     */
-	public function __construct(Parameters $parameters)
-	{
-		$this->parameters = $parameters;
-	}
 	
 	/**
      * Display a listing of the resource.

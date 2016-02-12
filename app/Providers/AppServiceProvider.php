@@ -26,8 +26,12 @@ class AppServiceProvider extends ServiceProvider
 				'suppliers.edit',
 				'items.list',
 				'items.create',
+				'items.show',
+				'items.edit',
 				'items/category.list',
 				'items/uom.list',
+				'purchase.create',
+				'purchase.list',
 				
 				'inventory.list',
 				'inventory/items.create',

@@ -25,4 +25,21 @@ class Branch extends Model
 		'email',
 		'remarks'
 	];
+	
+	/**
+     * Paired a column to column 'name' as key
+     *
+     * @return array
+     */
+	public static function pairedToName($key = 'id')
+	{
+		$paramRaw = Branch::select(['name', $key])->get()->keyBy($key);
+		
+		$param = collect($paramRaw)
+			->map(function($paramRaw) {
+				return $paramRaw->name;
+			});
+			
+		return $param;
+	}
 }

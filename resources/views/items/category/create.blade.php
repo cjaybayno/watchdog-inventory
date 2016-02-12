@@ -38,7 +38,7 @@
 	  <div class="modal-footer">
 		<div class="col-sm-12">
 			<button type="button" class="form-btn btn btn-sm btn-primary pull-left" id="new-form-submit">Save</button>
-			<button type="button" class="form-btn btn btn-sm btn-default pull-left" id="clear-btn">Clear</button>
+			<button type="button" class="form-btn btn btn-sm btn-default pull-left clear-btn">Clear</button>
 			<button type="button" class="form-btn close-btn btn-sm btn btn-default" data-dismiss="modal" id="close-btn">Close</button>
 		</div>
 	  </div>

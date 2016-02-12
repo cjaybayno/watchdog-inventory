@@ -113,12 +113,8 @@
 					$('.submit-btn').hide();
 					$('input, textarea').attr('readonly', true);
 					$('.select2').prop('disabled', true);
-					$('#supplier-result').empty().html('\
-						<div class="col-xs-offset-3 col-xs-6">\
-							<div class="alert alert-success">\
-								<i><center>'+result.message+'</center></i>\
-							</div>\
-						</div>');
+					successAlert('#supplier-result', result.message);
+					
 				}
 			});
 			
@@ -166,13 +162,7 @@
 					$('.submit-btn').hide();
 					$('input, textarea').attr('readonly', true);
 					$('.select2').prop('disabled', true);
-					$('#supplier-result').empty().html('\
-						<div class="col-xs-offset-3 col-xs-6">\
-							<div class="alert alert-success">\
-								<i><center>'+result.message+'</center></i>\
-							</div>\
-						</div>\
-					');
+					successAlert('#supplier-result', result.message);
 						
 					$('#add-edit-btn').empty().html('\
 						<button class="btn btn-block btn-sm btn-info pull-right" id="edit-btn">\

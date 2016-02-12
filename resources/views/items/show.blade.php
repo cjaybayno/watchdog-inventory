@@ -2,14 +2,11 @@
 @section('title', 'Items')
 
 @section('addStylesheets')
-	<link rel="stylesheet" href="{!! asset('public/adminlte/plugins/select2/select2.min.css') !!}">
-	<link rel="stylesheet" href="{!! asset('public/adminlte/plugins/fileinput/css/fileinput.min.css') !!}">
-@endsection
-
-@section('addScripts')
-	<script src="{!! asset('public/adminlte/plugins/select2/select2.full.min.js') !!}"></script>
-	<script src="{!! asset('public/adminlte/plugins/fileinput/js/fileinput.min.js') !!}"></script>
-	<script src="{!! asset('resources/assets/js/item/item-form-function.js') !!}"></script>
+	<style>
+		input[type="text"]:read-only {
+			background-color: #fff; 
+		}
+	</style>
 @endsection
 
 @section('content')
@@ -17,16 +14,25 @@
 <div class="content-wrapper">
 	<!-- Content Header (Page header) -->
 	<section class="content-header">
-	  <h1 class="pull-left">
-		Item Create
-	  </h1>
+	  <h1 class="pull-left">Item Info</h1>
 	  <div class="pull-right">
-		 <div class="btn-group">
+		<div class="btn-group">
 		  <a href="{{ URL::route('items') }}">
 			<button class="btn btn-block btn-sm btn-default pull-right"><span class="fa fa-list"></span> Show List</button>
 		  </a>
 		</div>
-		<div id="add-edit-btn" class="btn-group"></div>
+		&nbsp
+		<div class="btn-group">
+		  <a href="{{ URL::route('items.edit', $item->id) }}">
+			  <button class="btn btn-block btn-sm btn-info pull-right"><span class="fa fa-edit"></span> Edit </button>
+			</a>
+		</div>
+		&nbsp
+		<div class="btn-group">
+		  <a href="{{  URL::route('items.create') }}">
+			<button class="btn btn-block btn-sm btn-primary"><span class="fa fa-plus-circle"></span> Add Items</button>
+		  </a>
+		</div>
 	  </div>
 	</section>
 	<br>
@@ -46,35 +52,35 @@
 						  <label for="code" class="col-sm-4 control-label">Code</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-code"></div>
-							<input type="text" name="code" style="width:50%; text-transform:uppercase;" class="form-control" id="code" placeholder="Code">
+							<input type="text" name="code" style="width:50%; text-transform:uppercase;" class="form-control" id="code" value="{{ $item->code }}" readonly>
 						  </div>
 						</div>
 						<div class="form-group" id="form-group-brand">
 						  <label for="brand" class="col-sm-4 control-label">Brand</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-brand"></div>
-							<input type="text" name="brand" style="text-transform:capitalize;" class="form-control" id="brand" placeholder="Brand">
+							<input type="text" name="brand" style="text-transform:capitalize;" class="form-control" id="brand" value="{{ $item->brand }}" readonly>
 						  </div>
 						</div>
 						<div class="form-group" id="form-group-name">
 						  <label for="name" class="col-sm-4 control-label">Name</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-name"></div>
-							<input type="text" name="name" style="text-transform:capitalize;" class="form-control" id="name" placeholder="Name">
+							<input type="text" name="name" style="text-transform:capitalize;" class="form-control" id="name" value="{{ $item->name }}" readonly>
 						  </div>
 						</div>
 						<div class="form-group" id="form-group-category">
 						  <label for="category" class="col-sm-4 control-label">Category</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-category"></div>
-							{!! Form::select('category', $selectCategory, null, ['class' => 'form-control select2', 'id' => 'category', 'style' => 'width:100%']) !!}
+							{!! Form::select('category', $selectCategory, $item->category, ['class' => 'form-control select2', 'id' => 'category', 'style' => 'width:100%', 'disabled']) !!}
 						  </div>
 						</div>
 						<div class="form-group" id="form-group-supplier">
 						  <label for="supplier" class="col-sm-4 control-label">Supplier</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-supplier"></div>
-							{!! Form::select('supplier', $selectSupplier, null, ['class' => 'form-control select2', 'id' => 'supplier', 'style' => 'width:100%']) !!}
+							{!! Form::select('supplier', $selectSupplier, $item->supplier_id, ['class' => 'form-control select2', 'id' => 'supplier', 'style' => 'width:100%', 'disabled']) !!}
 						  </div>
 						</div>
 						<br>
@@ -82,14 +88,14 @@
 						  <label for="measurement" class="col-sm-4 control-label">Measurement</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-measurement"></div>
-							<input type="text" name="measurement" style="width:50%"; class="form-control" id="measurement" placeholder="Measurement">
+							<input type="text" name="measurement" style="width:50%"; class="form-control" id="measurement" value="{{ $item->measurement }}" readonly>
 						  </div>
 						</div>
 						<div class="form-group" id="form-group-uom">
 						  <label for="uom" class="col-sm-4 control-label">UOM</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-uom"></div>
-							{!! Form::select('uom', $selectUom, null, ['class' => 'form-control select2', 'id' => 'uom', 'style' => 'width:50%']) !!}
+							{!! Form::select('uom', $selectUom, $item->uom, ['class' => 'form-control select2', 'id' => 'uom', 'style' => 'width:50%', 'disabled']) !!}
 						  </div>
 						</div>
 					</div>
@@ -99,7 +105,7 @@
 						  <label for="price" class="col-sm-4 control-label">Price</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-price"></div>
-							<input type="text" name="price" style="width:50%"; class="form-control" id="price" placeholder="Price">
+							<input type="text" name="price" style="width:50%"; class="form-control" id="price" value="{{ $item->current_price }}" readonly>
 						  </div>
 						</div>
 						
@@ -107,26 +113,20 @@
 						  <label for="costing" class="col-sm-4 control-label">Costing</label>
 						  <div class="col-sm-8">
 							<div class="error" id="error-costing"></div>
-							<input type="text" name="costing" style="width:50%"; class="form-control" id="costing" placeholder="Costing">
+							<input type="text" name="costing" style="width:50%"; class="form-control" id="costing" value="{{ $item->costing_price }}" readonly>
 						  </div>
 						</div>
 						
 						<div class="form-group" id="form-group-image">
 						  <label for="image" class="col-sm-4 control-label">Image</label>
 						  <div class="col-sm-6">
-						    <div class="error" id="error-image"></div>
-							<input type="file" name="image" id="image" class="file-loading" >
+						   <div style="width:200px">
+						     <img src="{!! !empty($item->image) ? $item->image : url('public/images/items/default/default-logo.jpg'); !!}" class="img-thumbnail">
+						   </div>
 						  </div>
 						</div>
 					</div>
 				  </div><!-- /.box-body -->
-				  <div class="box-footer">
-					<div class="col-sm-offset-1 col-sm-4">
-					  <button type="submit" class="btn btn-primary btn-sm submit-btn" id="new-form-submit">Create</button>
-					  &nbsp
-					  <div class="btn btn-default btn-sm clear-btn submit-btn">Clear</div>
-					</div>
-				  </div><!-- /.box-footer -->
 				</form>
 				<!-- /.box -->	
 			 </div><!-- /.box -->

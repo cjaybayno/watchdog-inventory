@@ -51,9 +51,10 @@
 						<th>Code</th>
 						<th>Brand Name</th>
 						<th>Item Name</th>
-						<th>Measurement</th>
-						<th>UOM</th>
+						<th>Measures</th>
 						<th>Category</th>
+						<th>Supplier</th>
+						<th>Price</th>
 						<th></th>
 					  </tr>
 					</thead>

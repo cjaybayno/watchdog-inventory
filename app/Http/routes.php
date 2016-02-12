@@ -56,17 +56,17 @@ Route::group(['middleware' => 'auth'], function() {
 		'postUpdate'=> 'items.update',
 	]);
 	
-	// items category route
+	//items category route
 	Route::controller('items-category', 'ItemsCategoryController', [
 		'getIndex'  => 'items_category',
 	]);
 	
-	// items uom route
+	//items uom route
 	Route::controller('items-uom', 'ItemsUnitOfMeasurement', [
 		'getIndex'  => 'items_uom',
 	]);
 	
-	// branches route
+	//branches route
 	Route::controller('branches', 'BranchesController', [
 		'getIndex'  => 'branches',
 		'getCreate' => 'branches.create',
@@ -88,30 +88,17 @@ Route::group(['middleware' => 'auth'], function() {
 		'postUpdate'=> 'suppliers.update',
 	]);
 	
-	// inventory route
-	Route::group(['prefix' => 'inventory'], function() {
-		// branches route
-		
-		// items route
-		Route::controller('items', 'ItemsController');
-		// measurements units route
-		Route::controller('measurement-units', 'MeasurementUnitsController', [
-			'getIndex'  => 'munits',
-			'getCreate' => 'munits.create',
-			'getShow' 	=> 'munits.show',
-			'getEdit'   => 'munits.edit',
-			'getDelete' => 'munits.delete',
-			'postStore' => 'munits.store',
-			'postUpdate'=> 'munits.update',
-		]);
-	});
-	
+	Route::controller('purchases', 'PurchasesController', [
+		'getIndex' 	=> 'purchases',
+		'getCreate' => 'purchases.create',
+	]);
 	
 	// purchase route: show purchase item  page
-	Route::get('purchases/purchase-item', [
-		'as'   => 'purchase.item',
-		'uses' => 'PurchasesController@create'
-	]);
+	// Route::get('purchases/purchase-item', [
+		// 'as'   => 'purchase.item',
+		// 'uses' => 'PurchasesController@create'
+	// ]);
+	/*
 	// purchase route: send to server purchase item
 	Route::post('purchases/save', [
 		'as'   => 'purchase.item.post',
@@ -124,6 +111,7 @@ Route::group(['middleware' => 'auth'], function() {
 	]);	
 	//purchase route: paginate list
 	Route::get('purchases/paginate', ['uses' => 'PurchasesController@paginate']);
+	*/
 	
 	// Users Routes
 	Route::get('user/register', 	 'UserController@create');

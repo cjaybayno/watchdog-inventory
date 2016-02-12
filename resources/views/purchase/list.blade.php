@@ -1,5 +1,5 @@
 @extends('layouts.adminlte')
-@section('title', 'Purchases List')
+@section('title', 'Branches')
 
 @section('addStylesheets')
 	<!-- Add Datatables Css --->
@@ -12,7 +12,7 @@
     <script src="{!! asset('public/adminlte/plugins/datatables/jquery.dataTables.min.js') !!}"></script>
     <script src="{!! asset('public/adminlte/plugins/datatables/dataTables.bootstrap.min.js') !!}"></script>
     <script src="{!! asset('public/adminlte/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js') !!}"></script>
-	<script src="{!! asset('resources/assets/js/purchase-function.js') !!}"></script>
+	<script src="{!! asset('resources/assets/js/purchase/purchase-function.js') !!}"></script>
 @endsection
 
 @section('content')
@@ -21,15 +21,16 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1 class="pull-left">
-            Purchase List
+            Purchases List	
           </h1>
 		  <div class="pull-right">
-		    <a href="{{ URL::route('purchase.item') }}">
-			  <button class="btn btn-block btn-primary"><span class="fa fa-plus-circle"></span> Purchase Item</button>
-		    </a>
+			<div class="btn-group">
+			  <a href="{{ URL::route('purchases.create') }}">
+				<button class="btn btn-block btn-sm btn-primary"><span class="fa fa-plus-circle"></span> Create PO</button>
+			</a>
+			</div>
 		  </div>
         </section>
-		<br>
 		<br>
         <!-- Main content -->
         <section class="content">
@@ -38,27 +39,22 @@
             <div class="col-md-12">
               <div class="box box-primary">
                 <div class="box-body">
-					@if (session('delete_status'))
-					  <div class="alert alert-danger alert-dismissable">
-						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-					    <i><center>{{ session('delete_status') }}</center></i>
-					  </div>
-				    @endif
-				   <table id="purchase-list"  class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Branch</th>
-                        <th>Item</th>
-                        <th>Price</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                        <th>Purchase Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
+				  <table id="purchases-list-table"  class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+					<thead>
+					  <tr>
+						<th>Order #</th>
+						<th>Invoice #</th>
+						<th>Supplier</th>
+						<th>Total</th>
+						<th>Status</th>
+						<th>Created</th>
+						<th>Expected Delivery</th>
+						<th></th>
+					  </tr>
+					</thead>
+					<tbody>
+					</tbody>
+				  </table>				  
                 </div><!-- /.box-body -->
               </div><!-- /.box -->
              </div><!-- /col -->

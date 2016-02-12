@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Datatables;
-use App\Branch;
-use App\VwBranchAndItemPurchase;
 use App\Item;
+use App\Branch;
+use App\Supplier;
 use App\Purchase;
+use App\PurchaseItem;
+use App\PurchaseOrder;
 use App\Http\Requests;
+use App\VwBranchAndItemPurchase;
 use App\Http\Controllers\Controller;
 
 class PurchasesController extends Controller
@@ -24,9 +27,9 @@ class PurchasesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function getIndex()
     {
-        return view('purchase.list')->with($this->menuKey, $this->menuValue);
+       return view('purchase.list')->with($this->menuKey, $this->menuValue);
     }
 	
 	 /**
@@ -34,33 +37,41 @@ class PurchasesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function paginate(Request $request)
+    public function getPaginate(Request $request)
     {
 		if (! $request->ajax()) {
 			abort(404);
 		}
 	 
-		$purchase = VwBranchAndItemPurchase::select([
+		$purchaseOrder = PurchaseOrder::select([
 			'id',
-			'branch',
-			'item_name',
-			'item_brand',
-			'item_measurement',
-			'item_unit',
-			'price',
-			'quantity',
+			'invoice_number',
+			'supplier_id',
 			'total',
-			'created_at'
+			'status',
+			'created_at',
+			'expected_date'
 		]);
 		
-		return Datatables::of($purchase)
-					->addColumn('item_name', function ($purchase) {
-						return view('purchase/datatables.item', $purchase)->render();
+		return Datatables::of($purchaseOrder)
+					->addColumn('id', '{{ str_pad($id, 5, 0, STR_PAD_LEFT) }}')
+					->addColumn('supplier_id', function ($purchaseOrder) {
+						return Supplier::select()->find($purchaseOrder->supplier_id)->name;
 					})
-					->removeColumn('item_brand')
-					->removeColumn('item_measurement')
-					->removeColumn('item_unit')
-					->addColumn('created_at', '{{ date("F jS, Y h:i:s a", strtotime($created_at)) }}')
+					->addColumn('total', '{{ number_format($total, 2) }}')
+					->addColumn('status', function ($purchaseOrder) {
+						return view('purchase/datatables.status', $purchaseOrder)->render();
+					})
+					->addColumn('created_at', '{{ date("Y/m/d h:i:s a", strtotime($created_at)) }}')
+					->addColumn('expected_date', function($purchaseOrder){
+						if (empty($purchaseOrder->expected_date))
+							return 'no date yet';
+						else 
+							return date("Y/m/d h:i:s a", strtotime($purchaseOrder->expected_date));
+					})
+					->addColumn('action', function ($purchaseOrder) {
+						return view('purchase/datatables.action', $purchaseOrder)->render();
+					})
 					->make();
     }
 
@@ -69,30 +80,45 @@ class PurchasesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function getCreate()
     {
-		/* === get options items for select === */
-		$items 	  	 = Item::all(['id', 'brand', 'name', 'measurement', 'unit']);
-		$selectItems = [];
-		$selectItems[null] = 'Select Items'; // set default selected
-		foreach ($items as $item) {
-			$selectItems[$item->id] = $item->brand.' '.$item->name.' ('.$item->measurement.$item->unit.')';
-		}
-		
-		/* === get options branch for select === */
-		$branches 		      = Branch::all(['id','name']);
-		$selectBranches       = [];
-		$selectBranches[null] = 'Select Branch'; // set default selected
-		foreach ($branches as $branch) {
-			$selectBranches[$branch->id] = $branch->name;
-		}
-		
 		return view('purchase.create')->with([
-			'selectItems' 	 => $selectItems,
-			'selectBranches' => $selectBranches,
+			'selectBranches' => Branch::pairedToName(),
+			'selectSupplier' => Supplier::pairedToName(['defaultKeyValue' => 'Select Supplier']),
 			$this->menuKey 	 => $this->menuValue
 		]);
     }
+	
+	/**
+     * Get Items of Supplier.
+     *
+     * @return JSON
+     */
+	public function getItemsOfSupplier($supplierId) {
+		$selectItems = Item::select([
+			'id',
+			'brand',
+			'name',
+			'measurement',
+			'uom',
+			'current_price'
+		])
+		->where([
+			'supplier_id' => $supplierId]
+		)
+		->get();
+		
+		return response()->json($selectItems);
+	}
+	
+	/**
+     * Get Items Details
+     *
+     * @return JSON
+     */
+	public function getItemPrice($itemId) {
+		return response()->json(Item::select('current_price')->find($itemId));
+	}
 
     /**
      * Store a newly created resource in storage.
@@ -100,29 +126,75 @@ class PurchasesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function postStore(Request $request)
     {
-		$rules = array_merge(
-			['branch_purchase' => 'required'],
-			$this->setIteratePostParam($request, 'item_purchase'),
-			$this->setIteratePostParam($request, 'quantity','required|numeric'),
-			$this->setIteratePostParam($request, 'price', 'required|numeric')
-		);
-	
-		$this->validate($request, $rules, [
-			'required' => ' This is required',
-			'numeric'  => ' Must be numeric',
-		]);
+		/* === validate quantity request === */
+		if ($this->validateQuantityRequest($request->quantity)) {
+			/* === save to purchase_orders table === */
+			$purchaseOrder = new PurchaseOrder();
+			$purchaseOrder->branch_id 	= $request->branch;
+			$purchaseOrder->supplier_id = $request->supplier;
+			$purchaseOrder->total	    = $request->total_raw;
+			$purchaseOrder->remarks	    = $request->remarks;
+			$purchaseOrder->status	    = 'PENDING';
+			$purchaseOrder->save();
+			
+			/* === set data for purchase_items === */
+			$quantityCount 		= count($request->quantity);
+			$purchaseItemsArray = [];
+			for ($i = 0; $i < $quantityCount; $i++) {
+				if ($request->quantity[$i] != 0 OR $request->quantity[$i] != '') {
+					/* === include only the qunatity that is not 0.00 and '' in value === */
+					$purchaseItemsArray[] = [
+						'purchase_order_number' => $purchaseOrder->id,
+						'item_id' 				=> $request->item[$i],
+						'quantity' 				=> $request->quantity[$i],
+						'price' 				=> $request->price[$i],
+						'discount' 				=> $request->discount[$i],
+						'subtotal' 				=> $request->subtotal[$i],
+					];
+				}
+			}
+			
+			/* === save to purchase_items table === */
+			PurchaseItem::insert($purchaseItemsArray);
+			
+			return response()->json([
+				'success' => true,
+				'message' => 'PO Created',
+				'debug'	  => $purchaseItemsArray,
+			]);
+		} else {
+			return response()->json([
+				'success' => false,
+				'message' => 'Must Have Atleast 1 Item',
+			]);
+		}
 		
-		Purchase::insert($this->setBatchInsertArray($request));
-		
-		return response()->json([
-			'success' => true,
-			'message' => 'Purchase Save!',
-		]);
     }
 	
-	 /**
+	/**
+	 * Validate Quantity Request
+	 * count quantity with value == ''
+	 * if any return false, else true
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  String	$request
+	 * @param  String	$rules
+	 * @return array
+	 */
+	private function validateQuantityRequest($value)
+	{
+		$flag  = 0;
+		$count = count($value);
+		for ($i = 0; $i < $count; $i++) {
+			if ($value[$i] == '' OR $value[$i] == 0) $flag++;
+		}
+		
+		return ($flag === $count) ? false : true;
+	}
+		
+	/**
 	 * Set an iteration post parameter data.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
@@ -135,7 +207,7 @@ class PurchasesController extends Controller
 		$inputCount = count($request->input($inputName));
         if ($inputCount >= 0) { 
 			$inputArray = [];
-			for($i = 0; $i < $inputCount; $i++ ) {
+			for($i = 0; $i < $inputCount; $i++) {
 				$inputArray[$inputName.'.'.$i] = $rules;
 			}
 		} else {
@@ -169,7 +241,6 @@ class PurchasesController extends Controller
 				'created_at'=> date("Y-m-d H:i:s")
 			];
 		}
-		
 		
 		return $newArray;
 	}

@@ -30,14 +30,6 @@
           <ul class="sidebar-menu">
             <!-- Optionally, you can add icons to the links -->
             <li class="{{ $dashboardActiveMenu or '' }}"><a href="{{ URL::to('dashboard') }}"><i class="fa fa-dashboard"></i><span>Dashboard</span></a></li>
-			<!-- <li class="treeview {{ $itemActiveMenu or '' }} {{ $MunitActiveMenu or '' }}">
-			  <a href="#"><i class="fa fa-cubes"></i><span>Inventory</span><i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
-                <li class="{{ $itemActiveMenu or '' }}"><a href="{{ URL::to('inventory/items') }}"><i class="fa fa-angle-double-right"></i>Items</a></li>
-                <li class="{{ $MunitActiveMenu or '' }}"><a href="{{ URL::route('munits') }}"><i class="fa fa-angle-double-right"></i>Measurement Units</a></li>
-              </ul>
-            </li> -->
-			
 			<li class="treeview {{ $itemActiveMenu or '' }} {{ $itemCategoryActiveMenu or ''  }} {{ $itemUomActiveMenu or '' }}">
 			  <a href="#"><i class="fa fa-cart-plus"></i><span>Items</span><i class="fa fa-angle-left pull-right"></i></a>
               <ul class="treeview-menu">

@@ -39,7 +39,7 @@
 	  <div class="modal-footer">
 		<div class="col-xs-12">
 			<button type="button" class="form-btn btn btn-sm btn-info pull-left" id="modify-form-submit">Modify</button>
-			<button type="button" class="form-btn btn btn-sm btn-default pull-left" id="clear-btn">Clear</button>
+			<button type="button" class="form-btn btn btn-sm btn-default pull-left clear-btn">Clear</button>
 			<button type="button" class="form-btn close-btn btn-sm btn btn-default" data-dismiss="modal" id="close-btn">Close</button>
 		</div>
 	  </div>

@@ -80,17 +80,13 @@ function ajaxCsrfToken() {
 }
 
 /* === add two Zero === */
-function addTwoZero( num ) {
-    var value = Number(num);
-    var res = num.split(".");
-    if(num.indexOf('.') === -1) {
-        value = value.toFixed(2);
-        num = value.toString();
-    } else if (res[1].length < 3) {
-        value = value.toFixed(2);
-        num = value.toString();
-    }
-	return num
+function addTwoZero(num) {
+	return num.toFixed(2);
+}
+
+/* === add comma every 3 digit === */
+function digits(num){ 
+    return num.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); 
 }
 
 /* === Date Format === */
@@ -111,4 +107,25 @@ function removeInputErrors() {
 function errorLabel(message) {
 	return '<label class="control-label">\
 				<i class="fa fa-times-circle-o"></i> '+message+'</label>'
+}
+
+/* === show success message === */
+function successAlert(selector, message) {
+	$(selector).empty().html('\
+		<div class="col-xs-offset-3 col-xs-6">\
+			<div class="alert alert-success">\
+				<i><center>'+message+'</center></i>\
+			</div>\
+		</div>');
+}
+
+/* === add Edit button in === */
+function addEditBtn(selector, url) {
+	$(selector).empty().html(
+		'<a href="'+url+'">\
+			<button class="btn btn-block btn-sm btn-info pull-right">\
+				<span class="fa fa-edit"></span> Edit\
+			</button>\
+		</a>'
+	);
 }
